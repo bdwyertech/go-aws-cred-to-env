@@ -18,13 +18,17 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/sts"
 )
 
-var disableSharedConfig bool
+var disableSharedConfig, displayCallerIdentity bool
 
 func init() {
 	if flag.Lookup("disable-shared-config") == nil {
 		flag.BoolVar(&disableSharedConfig, "disable-shared-config", false, "Disable Shared Configuration (force use of EC2/ECS metadata, ignore AWS_PROFILE, etc.)")
+	}
+	if flag.Lookup("display-caller-identity") == nil {
+		flag.BoolVar(&displayCallerIdentity, "display-caller-identity", false, "Display STS Get-Caller-Identity Output")
 	}
 }
 
@@ -67,6 +71,8 @@ func getCredentials() (creds credentials.Value) {
 
 	if disableSharedConfig {
 		sess_opts.SharedConfigState = session.SharedConfigDisable
+		os.Unsetenv("AWS_ACCESS_KEY_ID")
+		os.Unsetenv("AWS_PROFILE")
 	}
 
 	sess := session.Must(session.NewSessionWithOptions(sess_opts))
@@ -74,6 +80,16 @@ func getCredentials() (creds credentials.Value) {
 	creds, err := sess.Config.Credentials.Get()
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	// Validate the Credentials
+	svc := sts.New(sess)
+	result, err := svc.GetCallerIdentity(&sts.GetCallerIdentityInput{})
+	if err != nil {
+		log.Fatal(err)
+	}
+	if displayCallerIdentity {
+		log.Info("STS Get-Caller-Identity:\n", result)
 	}
 
 	return
