@@ -24,7 +24,7 @@ jobs:
         env:
           GOFLAGS: '-mod=vendor'
         run: |
-          go fmt $(go list ./... | grep -v /vendor/)
+          go fmt $(go list ./... | grep -v /vendor/) | xargs -I {} -r /bin/sh -c "/bin/echo {} && exit 1"
           go vet $(go list ./... | grep -v /vendor/)
           go test -v -race $(go list ./... | grep -v /vendor/)
 
