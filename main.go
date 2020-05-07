@@ -11,6 +11,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"runtime"
 
 	log "github.com/sirupsen/logrus"
 
@@ -45,9 +46,15 @@ func main() {
 
 	creds := getCredentials()
 
-	fmt.Printf("export AWS_ACCESS_KEY_ID=%s\n", creds.AccessKeyID)
-	fmt.Printf("export AWS_SECRET_ACCESS_KEY=%s\n", creds.SecretAccessKey)
-	fmt.Printf("export AWS_SESSION_TOKEN=%s\n", creds.SessionToken)
+	if runtime.GOOS == "windows" {
+		fmt.Printf("$env:AWS_ACCESS_KEY_ID='%s'\n", creds.AccessKeyID)
+		fmt.Printf("$env:AWS_SECRET_ACCESS_KEY='%s'\n", creds.SecretAccessKey)
+		fmt.Printf("$env:AWS_SESSION_TOKEN='%s'\n", creds.SessionToken)
+	} else {
+		fmt.Printf("export AWS_ACCESS_KEY_ID=%s\n", creds.AccessKeyID)
+		fmt.Printf("export AWS_SECRET_ACCESS_KEY=%s\n", creds.SecretAccessKey)
+		fmt.Printf("export AWS_SESSION_TOKEN=%s\n", creds.SessionToken)
+	}
 }
 
 func getCredentials() (creds credentials.Value) {
