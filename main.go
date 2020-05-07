@@ -10,10 +10,9 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 	"os"
 	"runtime"
-
-	log "github.com/sirupsen/logrus"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -89,7 +88,7 @@ func getCredentials() (creds credentials.Value) {
 		log.Fatal(err)
 	}
 	if displayCallerIdentity {
-		log.Info("STS Get-Caller-Identity:\n", result)
+		log.Print("STS Get-Caller-Identity:\n", result)
 	}
 
 	return
